@@ -1,38 +1,26 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
+const express = require("express");
+const path = require("path");
 const app = express();
-import cors from "cors";
-import connectDB from "./config/database.js";
+const cors = require("cors");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const PORT = 4000;
 // const HOST = "0.0.0.0";
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "../uploads")));
 
-async function start() {
-    const client = await connectDB();
-    app.listen(PORT, () => {
-        console.log(`${PORT}번에서 실행이 되었습니다.`);
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log("연결 완료");
+    })
+    .catch((error) => {
+        console.dir(error);
     });
-
-    process.on("SIGINT", async () => {
-        try {
-            await client.close();
-            console.log("정상 DB 연결 종료");
-            process.exit(0);
-        } catch (err) {
-            console.error("오류에 의한 DB 연결 종료", err);
-            process.exit(1);
-        }
-    });
-}
-start();
 
 app.get("/", (req, res) => {
     res.send("Hello World!222");
@@ -41,4 +29,8 @@ app.get("/", (req, res) => {
 app.post("/", (req, res) => {
     console.log(req.body);
     res.json(req.body);
+});
+
+app.listen(PORT, () => {
+    console.log(`${PORT}번에서 실행이 되었습니다.`);
 });
