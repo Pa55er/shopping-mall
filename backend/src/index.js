@@ -22,13 +22,22 @@ mongoose
         console.dir(error);
     });
 
-app.get("/", (req, res) => {
-    res.send("Hello World!222");
+app.get("/", (req, res, next) => {
+    setImmediate(() => {
+        next(new Error("it is an error"));
+    });
+    // res.send("Hello World!222");
 });
 
 app.post("/", (req, res) => {
     console.log(req.body);
     res.json(req.body);
+});
+
+// 에러 처리기
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    res.send(error.message || "서버에서 에러가 발생했습니다.");
 });
 
 app.listen(PORT, () => {
