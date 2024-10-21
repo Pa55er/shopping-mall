@@ -20,6 +20,14 @@ const userSchema = mongoose.Schema({
         default: 0,
     },
     image: String,
+    cart: {
+        type: Array,
+        default: [],
+    },
+    history: {
+        type: Array,
+        default: [],
+    },
 });
 
 // 비밀번호 암호화
