@@ -4,9 +4,11 @@ import CheckBox from "./Sections/CheckBox";
 import RadioBox from "./Sections/RadioBox";
 import SearchInput from "./Sections/SearchInput";
 import axiosInstance from "../../utils/axios";
+import { continents, prices } from "../../utils/filterData";
 
 const LandingPage = () => {
     const limit = 4;
+    const [searchTerm, setSearchTerm] = useState("");
     const [products, setProducts] = useState([]);
     const [skip, setSkip] = useState(0);
     const [hasMore, setHasMore] = useState(false);
@@ -52,9 +54,57 @@ const LandingPage = () => {
             limit,
             loadMore: true,
             filters,
+            searchTerm,
         };
         fetchProducts(body);
         setSkip(skip + limit);
+    };
+
+    const handleFilters = (newFilteredData, category) => {
+        const newFilters = { ...filters };
+        newFilters[category] = newFilteredData;
+        if (category === "price") {
+            const priceValues = handlePrice(newFilteredData);
+            newFilters[category] = priceValues;
+        }
+        showFilteredResults(newFilters);
+        setFilters(newFilters);
+    };
+
+    const handlePrice = (value) => {
+        let array = [];
+
+        for (let i = 0; i < prices.length; i++) {
+            if (prices[i]._id === parseInt(value, 10)) {
+                array = prices[i].array;
+                break;
+            }
+        }
+        return array;
+    };
+
+    const showFilteredResults = (filters) => {
+        const body = {
+            skip: 0,
+            limit,
+            filters,
+            searchTerm,
+        };
+
+        fetchProducts(body);
+        setSkip(0);
+    };
+
+    const handleSearchTerm = (event) => {
+        const body = {
+            skip: 0,
+            limit,
+            filters,
+            searchTerm: event.target.value,
+        };
+        setSkip(0);
+        setSearchTerm(event.target.value);
+        fetchProducts(body);
     };
 
     return (
@@ -66,16 +116,29 @@ const LandingPage = () => {
             {/* Filter */}
             <div className="flex gap-3">
                 <div className="w-1/2">
-                    <CheckBox />
+                    <CheckBox
+                        continents={continents}
+                        checkedContinents={filters.continents}
+                        onFilters={(filters) =>
+                            handleFilters(filters, "continents")
+                        }
+                    />
                 </div>
                 <div className="w-1/2">
-                    <RadioBox />
+                    <RadioBox
+                        prices={prices}
+                        checkedPrices={filters.price}
+                        onFilters={(filters) => handleFilters(filters, "price")}
+                    />
                 </div>
             </div>
 
             {/* Search */}
-            <div className="flex justify-end">
-                <SearchInput />
+            <div className="flex justify-end mb-3">
+                <SearchInput
+                    searchTerm={searchTerm}
+                    onSearch={handleSearchTerm}
+                />
             </div>
 
             {/* Card */}
