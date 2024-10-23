@@ -10,7 +10,7 @@ const paymentSchema = mongoose.Schema(
             type: Array,
             default: [],
         },
-        Product: {
+        product: {
             type: Array,
             default: [],
         },
